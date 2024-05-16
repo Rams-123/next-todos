@@ -7,7 +7,7 @@ export default function Home() {
   return (
     <section className="flex flex-col w-full max-w-md mx-auto border border-slate-500 rounded-2xl  mt-10 my-10">
       <div className=" flex items-center justify-centert px-8 py-10 mx-auto">
-        <h1 className=" text-3xl font-bold">Today's Todos</h1>
+        <h1 className=" text-3xl font-bold">Today Todos</h1>
       </div>
 
       <div className=" flex flex-col gap-4">
