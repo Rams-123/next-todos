@@ -1,9 +1,7 @@
-import Image from "next/image";
+"use client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Checkbox } from "@/components/ui/checkbox"
 import { Trash2 } from 'lucide-react';
-
 import {
   Drawer,
   DrawerClose,
@@ -13,9 +11,56 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer"
+import { useState, useEffect } from "react";
 
 export default function Home() {
-  const tasks = Array.from({ length: 6 }, (_, i) => i + 1);
+  const [todos, setTodos] = useState([]);
+  const [newTitle, setNewTitle] = useState("");
+  const [newDescription, setNewDescription] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingIndex, setEditingIndex] = useState(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  useEffect(() => {
+    const storedTodos = JSON.parse(localStorage.getItem("todos"));
+    if (storedTodos) {
+      setTodos(storedTodos);
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("todos", JSON.stringify(todos));
+  }, [todos]);
+
+  const handleAddTodo = (e) => {
+    e.preventDefault();
+    if (isEditing) {
+      const updatedTodos = [...todos];
+      updatedTodos[editingIndex] = { title: newTitle, description: newDescription };
+      setTodos(updatedTodos);
+      setIsEditing(false);
+      setEditingIndex(null);
+    } else {
+      const newTodo = { title: newTitle, description: newDescription };
+      setTodos([...todos, newTodo]);
+    }
+    setNewTitle("");
+    setNewDescription("");
+    setIsDrawerOpen(false);
+  };
+
+  const handleDeleteTodo = (index) => {
+    setTodos(todos.filter((_, i) => i !== index));
+  };
+
+  const handleEditTodo = (index) => {
+    setNewTitle(todos[index].title);
+    setNewDescription(todos[index].description);
+    setIsEditing(true);
+    setEditingIndex(index);
+    setIsDrawerOpen(true);
+  };
+
   return (
     <section className="flex flex-col h-screen w-full max-w-md mx-auto p-4 overflow-hidden">
       <div className="flex flex-col w-full border border-slate-500 p-5 rounded-2xl gap-4 flex-grow">
@@ -24,33 +69,49 @@ export default function Home() {
             <h1 className="text-lg font-bold">Today Todos</h1>
           </div>
           <div className="flex flex-col flex-grow gap-4 overflow-auto">
-            {tasks.map((task, index) => (
-              <div key={index} className="flex border shadow-lg border-slate-500 px-5 py-3 items-center justify-between rounded-md">
-                <div className="flex w-full items-center text-center">
-                  <input type="checkbox" className="items-center" />
-                  {/* <Checkbox size={40} /> */}
-                  <p className="px-5 w-full flex flex-1">This is an example of task {task}</p>
-                  <button className="hover:text-red-500 rounded-md" aria-label="Delete Task">
+            {todos.map((todo, index) => (
+              <div key={index} className="flex flex-col border shadow-lg border-slate-500 px-5 py-3 rounded-md">
+                <div className="flex w-full items-center justify-between">
+                  <input
+                    type="checkbox"
+                    className="items-center"
+                    onClick={() => handleEditTodo(index)}
+                  />
+                  <p className="px-5 w-full flex flex-1">{todo.title}</p>
+                  <button
+                    className="hover:text-red-500 rounded-md"
+                    aria-label="Delete Task"
+                    onClick={() => handleDeleteTodo(index)}
+                  >
                     <Trash2 className='hover:text-red-600' size={13} />
                   </button>
                 </div>
+                <p className="px-5 w-full text-gray-600">{todo.description}</p>
               </div>
             ))}
           </div>
-          <Drawer className="max-w-md">
+          <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen} className="max-w-md">
             <DrawerTrigger asChild>
               <Button className="w-full bg-blue-600">Add Todo</Button>
             </DrawerTrigger>
             <DrawerContent className="max-w-md mx-auto">
               <DrawerHeader>
-                <h2>Add Todo list</h2>
-                <Input placeholder="Add Todo title" />
+                <h2>{isEditing ? "Edit Todo" : "Add Todo"}</h2>
+                <Input
+                  placeholder="Add Todo title"
+                  value={newTitle}
+                  onChange={(e) => setNewTitle(e.target.value)}
+                />
                 <DrawerTitle>
-                  <Input placeholder="Add description" />
+                  <Input
+                    placeholder="Add description"
+                    value={newDescription}
+                    onChange={(e) => setNewDescription(e.target.value)}
+                  />
                 </DrawerTitle>
               </DrawerHeader>
               <DrawerFooter>
-                <Button>Submit</Button>
+                <Button onClick={handleAddTodo}>{isEditing ? "Update Todo" : "Submit"}</Button>
                 <DrawerClose>
                   <Button className="w-full hover:bg-slate-800 hover:text-white" variant="outline">
                     Cancel
@@ -62,7 +123,5 @@ export default function Home() {
         </div>
       </div>
     </section>
-
-
   );
 }
