@@ -4,6 +4,8 @@ import { Separator } from "@/components/ui/separator"
 import { ThemeProvider } from "next-themes";
 // import Navbar from "@/components/ui/Navbar";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import Navbar from "@/components/Navbar";
 
 
 const inter = Inter({ subsets: ["latin"] });
@@ -16,15 +18,17 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={cn("flex h-screen w-screen flex-col mx-auto items-center justify-start p-4 bottom-4 rounded-lg", inter.className)}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
         >
-          {/* <Navbar /> */}
-          {children}
+          <main className="flex h-full flex-col gap-4 max-w-md overflow-hidden border border-slate-500">
+            <Navbar />
+            {children}
+          </main>
         </ThemeProvider>
       </body>
     </html>

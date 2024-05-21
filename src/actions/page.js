@@ -1,6 +1,9 @@
+
+
+// actions.js
 export const API_BASE_URL = 'https://dummyjson.com/todos';
 
-export const getTodo = async () => {
+export const getTodos = async () => {
     try {
         const res = await fetch(API_BASE_URL);
         if (!res.ok) {
@@ -12,7 +15,7 @@ export const getTodo = async () => {
     }
 };
 
-export const addTodo = async (todo, userId) => {
+export const addTodo = async (todo) => {
     try {
         const res = await fetch(`${API_BASE_URL}/add`, {
             method: 'POST',
@@ -20,17 +23,20 @@ export const addTodo = async (todo, userId) => {
             body: JSON.stringify({
                 todo,
                 completed: false,
-                userId,
+                userId: 5,
             }),
         });
         if (!res.ok) {
             throw new Error('Failed to add todo');
         }
-        return res.json();
+        const data = await res.json();
+        return data;
     } catch (error) {
         console.error('Error adding todo:', error);
     }
 };
+
+
 
 export const updateTodo = async (id, updatedData) => {
     try {
@@ -61,3 +67,5 @@ export const deleteTodo = async (id) => {
         console.error('Error deleting todo:', error);
     }
 };
+
+

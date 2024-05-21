@@ -17,6 +17,7 @@ module.exports = {
       },
     },
     extend: {
+      height: { navScreen: "calc(100%-64px)" },
       keyframes: {
         "accordion-down": {
           from: { height: "0" },

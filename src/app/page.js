@@ -5,22 +5,17 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Trash2, Edit } from "lucide-react";
 
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerDescription,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
-import Navbar from "@/components/Navbar";
+
+
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { addTodo, getTodos, updateTodo } from "@/actions/page";
+import { Scrollbar } from "@radix-ui/react-scroll-area";
+import TodoForm from "@/components/TodoForm";
 
 const API_BASE_URL = "https://dummyjson.com/todos";
 
-export default function Home() {
-  const [todos, setTodos] = useState([]);
+export default function Home({ todo, userId }) {
+  const [todos, setTodo] = useState([]);
   const [newTitle, setNewTitle] = useState("");
   const [newDescription, setNewDescription] = useState("");
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -30,39 +25,40 @@ export default function Home() {
   // Fetch todos on mount
   useEffect(() => {
     const fetchTodos = async () => {
-      const res = await fetch(API_BASE_URL);
-      const data = await res.json();
-      setTodos(data.todos);
+      // const res = await fetch(API_BASE_URL);
+      const data = await getTodos();
+      setTodo(data.todos);
     };
 
     fetchTodos();
   }, []);
 
   const handleAddTodo = async (e) => {
-    e.preventDefault();
+    e.preventDefault()
     try {
-      const res = await fetch(`${API_BASE_URL}/add`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          todo: newTitle,
-          description: newDescription,
-          completed: false,
-          userId: 1,
-        }),
-      });
-
-      if (!res.ok) {
-        throw new Error("Failed to add todo");
-      }
-
-      const newTodo = await res.json();
-      setTodos([...todos, newTodo]);
-      setNewTitle("");
-      setNewDescription("");
+      await addTodo(title)
       setIsDrawerOpen(false);
+      // addTodo({ title: newTitle, description: newDescription });
+
+      // const res = await fetch(`${API_BASE_URL}/add`, {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({
+      //     title,
+      //     // description,
+      //     completed: false,
+      //     userId,
+      //   }),
+      // });
+
+      // if (!res.ok) {
+      //   const errorText = await res.text();
+      //   throw new Error(`Failed to add todo: ${errorText}`);
+      // }
+
+      // return await res.json();
     } catch (error) {
-      console.error("Error adding todo:", error);
+      console.error('Error adding todo:', error.message);
     }
   };
 
@@ -84,7 +80,7 @@ export default function Home() {
       }
 
       const updatedTodo = await res.json();
-      setTodos(todos.map((todo) => (todo.id === updatedTodo.id ? updatedTodo : todo)));
+      setTodo(todos.map((todo) => (todo.id === updatedTodo.id ? updatedTodo : todo)));
       setNewTitle("");
       setNewDescription("");
       setSelectedTodo(null);
@@ -104,7 +100,7 @@ export default function Home() {
         throw new Error("Failed to delete todo");
       }
 
-      setTodos(todos.filter((todo) => todo.id !== id));
+      setTodo(todos.filter((todo) => todo.id !== id));
     } catch (error) {
       console.error("Error deleting todo:", error);
     }
@@ -127,12 +123,11 @@ export default function Home() {
   };
 
   return (
-    <section className="flex flex-col h-screen w-full max-w-md mx-auto p-4">
-      <div className="flex flex-col w-full border border-slate-500 p-5 rounded-2xl gap-4 flex-grow">
-        <div className="flex flex-col w-full gap-4 flex-grow">
-          <Navbar className="fixed" />
 
-          <div className="flex flex-col flex-grow gap-4">
+    <>
+      <div className="w-full flex flex-col overflow-hidden h-navScreen">
+        <ScrollArea className="w-full flex h-full border-none focus:border-none outline-none">
+          <div className="flex h-fit justify-start flex-col w-full gap-4 p-4">
             {todos.map((todo, index) => (
               <div key={index} className="flex flex-col border shadow-lg border-slate-500 px-5 py-3 rounded-md">
                 <div className="flex w-full items-center justify-between gap-4">
@@ -140,7 +135,8 @@ export default function Home() {
                   <button
                     className="hover:text-blue-500 rounded-md"
                     aria-label="Edit Task"
-                    onClick={() => openEditDrawer(todo)}
+                    onClick={() => updateTodo(todo.id)}
+                  // onClick={(() => handleAddTodo(setTodo))}
                   >
                     <Edit className="hover:text-blue-600" size={13} />
                   </button>
@@ -158,44 +154,12 @@ export default function Home() {
               </div>
             ))}
           </div>
-          <div className="">
-            <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen} className="max-w-md">
-              <DrawerTrigger asChild>
-                <Button className="w-full bg-blue-600">Add Todo</Button>
-              </DrawerTrigger>
-              <DrawerContent className="max-w-md mx-auto flex gap-4">
-                <DrawerHeader className="grid w-full gap-4">
-                  <h2>{isEditing ? "Edit Todo" : "Add Todo"}</h2>
-                  <DrawerTitle>
-                    <Input
-                      placeholder="Add Todo title"
-                      value={newTitle}
-                      onChange={(e) => setNewTitle(e.target.value)}
-                    />
-                  </DrawerTitle>
-                  <DrawerDescription>
-                    <Input
-                      placeholder="Add description"
-                      value={newDescription}
-                      onChange={(e) => setNewDescription(e.target.value)}
-                    />
-                  </DrawerDescription>
-                </DrawerHeader>
-                <DrawerFooter className={"grid w-full grid-cols-2 gap-4"}>
-                  <Button onClick={isEditing ? handleUpdateTodo : handleAddTodo}>
-                    {isEditing ? "Update Todo" : "Submit"}
-                  </Button>
-                  <DrawerClose>
-                    <Button className="w-full" variant="outline" onClick={closeDrawer}>
-                      Cancel
-                    </Button>
-                  </DrawerClose>
-                </DrawerFooter>
-              </DrawerContent>
-            </Drawer>
-          </div>
-        </div>
+          <Scrollbar orientation="vertical" />
+        </ScrollArea>
       </div>
-    </section>
+      <div className="w-full flex px-4">
+        <TodoForm />
+      </div>
+    </>
   );
 }
