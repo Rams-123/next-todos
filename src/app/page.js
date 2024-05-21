@@ -138,19 +138,20 @@ export default function Home() {
                 <div className="flex w-full items-center justify-between gap-4">
                   <p className="px-5 w-full flex flex-1">{todo.todo}</p>
                   <button
-                    className="hover:text-red-500 rounded-md"
-                    aria-label="Delete Task"
-                    onClick={() => handleDeleteTodo(todo.id)}
-                  >
-                    <Trash2 className="hover:text-red-600" size={13} />
-                  </button>
-                  <button
                     className="hover:text-blue-500 rounded-md"
                     aria-label="Edit Task"
                     onClick={() => openEditDrawer(todo)}
                   >
                     <Edit className="hover:text-blue-600" size={13} />
                   </button>
+                  <button
+                    className="hover:text-red-500 rounded-md"
+                    aria-label="Delete Task"
+                    onClick={() => handleDeleteTodo(todo.id)}
+                  >
+                    <Trash2 className="hover:text-red-600" size={13} />
+                  </button>
+
                 </div>
                 <h2>{todo.title}</h2>
                 <p className="px-5 w-full text-gray-600">{todo.description}</p>
